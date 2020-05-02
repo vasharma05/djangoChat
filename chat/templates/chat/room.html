@@ -4,15 +4,41 @@
 <head>
     <meta charset="utf-8"/>
     <title>Chat Room</title>
+    <link rel="stylesheet" href={% static 'chat/css/index.css' %}>
 </head>
 <body>
-    <textarea id="chat-log" cols="100" rows="20" readonly></textarea><br>
-    <input id="chat-message-input" type="text" size="100"><br>
-    <input id="chat-message-submit" type="button" value="Send">
     {{ room_name|json_script:"room-name" }}
+    <div id="App">
+        <div id="left_article">
+            <ul>
+                {% for u in users %}
+                    {% if u.username != user.username %}
+                        <li><a href={% url 'chat:room' room_name=u.username %}>{{ u.username }}</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        <div id="right_article">
+            <ul id='box'>
+                
+            </ul>
+            <div id='input'>
+                <input id="chat-message-input" type="text">
+                <input id="chat-message-submit" type="button" value="Send">
+            </div>
+        </div>
+    </div>
+    
+
+
+
+
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
     <script src={% static 'chat/js/reconnecting-websocket.min.js' %}></script>
     <script>
         var username = "{{ user.username }}"
+        var room = "{{ room_name }}"
         const roomName = JSON.parse(document.getElementById('room-name').textContent);
 
         const chatSocket = new ReconnectingWebSocket(
@@ -25,10 +51,11 @@
         
         chatSocket.onopen = (e)=>{
             console.log("Connected")
-            chatSocket.send(JSON.stringify({'command':'fetch_messages'}))
+            chatSocket.send(JSON.stringify({'command':'fetch_messages', 'room':room}))
         }
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
+            // console.log(data)
             if(data['command']=== 'messages'){
                 for(let i =0; i<data['messages'].length;i++){
                     createMessage(data['messages'][i])
@@ -36,13 +63,27 @@
             }else if(data['command'] === 'new_message'){
                 createMessage(data['message'])
             }
-
         };
         function createMessage(message){
             // console.log(message)
-            document.querySelector("#chat-log").value += message.content+'\n'
+            let li = document.createElement('li')
+            let span = document.createElement('span')
+            span.textContent = message.author
+            if(message.author == username){
+                li.className = 'sent'
+                span.textContent = "You"
+            }else{
+                li.className = 'replies'
+                span.textContent = message.author
+            }
+            let p = document.createElement('p')
+            p.textContent = message.content
+            li.appendChild(span)
+            li.appendChild(p)
+            document.getElementById('box').appendChild(li)
         }
         chatSocket.onclose = function(e) {
+            document.getElementById('box').innerHTML = ""
             console.error('Chat socket closed unexpectedly');
         };
 
@@ -58,11 +99,15 @@
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
                 'message': message,
-                'command': 'new_messages',
-                'from': username
+                'command': 'new_message',
+                'from': username,
+                'room': room
             }));
             messageInputDom.value = '';
         };
+    </script>
+    <script type='text/babel'>
+        ReactDOM.render(<div>H1</div>, document.getElementById('root'))
     </script>
 </body>
 </html>

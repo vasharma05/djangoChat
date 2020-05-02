@@ -6,7 +6,7 @@ from . import models
 class ChatConsumer(WebsocketConsumer):
 
     def fetch_messages(self, data):
-        messages = models.Message.last_10_messages()
+        messages = models.Message.last_10_messages(data['room'])
         content = {
             'command': 'messages',
             'messages': self.messages_to_json(messages)
@@ -23,12 +23,13 @@ class ChatConsumer(WebsocketConsumer):
             })
         return result
 
-    def new_messages(self, data):
+    def new_message(self, data):
         author = data['from']
         author_user = User.objects.filter(username=author)[0]
         message = models.Message.objects.create(
             author = author_user,
-            content = data['message']
+            content = data['message'],
+            room = data['room']
         )
         content = {
             'command': 'new_message',
@@ -38,12 +39,12 @@ class ChatConsumer(WebsocketConsumer):
                 "timestamp": str(message.timestamp)
             }
         }
-        self.send(text_data=json.dumps(content))
+        self.send_chat_message(content)
 
 
     commands={
         'fetch_messages':fetch_messages,
-        'new_messages': new_messages
+        'new_message': new_message
     }
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -69,8 +70,7 @@ class ChatConsumer(WebsocketConsumer):
         data = json.loads(text_data)
         self.commands[data['command']](self,data)
     
-    def send_chat_message(self, text_data):
-        # Send message to room group
+    def send_chat_message(self, message):
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
@@ -78,12 +78,10 @@ class ChatConsumer(WebsocketConsumer):
                 'message': message
             }
         )
-
+        
     # Receive message from room group
-    def chat_message(self, event):
+    def chat_message(self, event): 
         message = event['message']
 
         # Send message to WebSocket
-        self.send(text_data=json.dumps({
-            'message': message
-        }))
+        self.send(text_data=json.dumps(message))

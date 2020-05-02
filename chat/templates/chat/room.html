@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,22 +10,38 @@
     <input id="chat-message-input" type="text" size="100"><br>
     <input id="chat-message-submit" type="button" value="Send">
     {{ room_name|json_script:"room-name" }}
+    <script src={% static 'chat/js/reconnecting-websocket.min.js' %}></script>
     <script>
+        var username = "{{ user.username }}"
         const roomName = JSON.parse(document.getElementById('room-name').textContent);
 
-        const chatSocket = new WebSocket(
+        const chatSocket = new ReconnectingWebSocket(
             'ws://'
             + window.location.host
             + '/ws/chat/'
             + roomName
             + '/'
         );
-
+        
+        chatSocket.onopen = (e)=>{
+            console.log("Connected")
+            chatSocket.send(JSON.stringify({'command':'fetch_messages'}))
+        }
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            document.querySelector('#chat-log').value += (data.message + '\n');
-        };
+            if(data['command']=== 'messages'){
+                for(let i =0; i<data['messages'].length;i++){
+                    createMessage(data['messages'][i])
+                }
+            }else if(data['command'] === 'new_message'){
+                createMessage(data['message'])
+            }
 
+        };
+        function createMessage(message){
+            // console.log(message)
+            document.querySelector("#chat-log").value += message.content+'\n'
+        }
         chatSocket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
         };
@@ -40,7 +57,9 @@
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
             chatSocket.send(JSON.stringify({
-                'message': message
+                'message': message,
+                'command': 'new_messages',
+                'from': username
             }));
             messageInputDom.value = '';
         };

@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'channels',
     'chat',
+    'accounts',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -132,3 +133,10 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+
+
+LOGIN_URL = "/accounts/login/"
+LOGOUT_URL = "/logout/"
+LOGOUT_SUCCESS = '/'
+LOGIN_SUCCESS = '/chat/'

@@ -1,37 +1,47 @@
-#App{
+body{
     width: 100%;
     height: 100vh;
     display: flex;
-    flex: 20% 72%;
+    align-self: center;
+    justify-content: center;
+    overflow-y: hidden;
+    margin: 0;
+}
+#App{
+    margin-top: 10vh;
+    width: 80vw;
+    height: 80vh;
+    display: flex;
     border: 1px solid;
     /* display: none ; */
 }
 #App > div{
-    overflow-y: auto;
-    height: 100vh;
+    overflow-y: hidden;
 }
 #App ul{
     list-style: none;
     margin:  0;
     padding: 0;
-    border: 1px solid
+    /* border: 1px solid; */
+    height: 100%;
 }
 #left_article{
-    border: 1px solid black;
-    padding: 2%;
-
+    width: 20%;
 }
 #right_article{
-    width: 100%;
+    width: 80%;
     border: 1px solid black;
     display: flex;
     flex-direction: column;
 }
 #box{
-    height: 95%;
+    height: 88%;
     padding: 1% 0;
-    border: 1px solid black;
+    /* border: 1px solid black; */
     overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 #input{
     height: 5%;
@@ -42,28 +52,61 @@ input:nth-child(1){
     width: 95%;
 }
 .sent, .replies{
-    max-width: 80%;
+    max-width: 40%;
+    word-break:break-all;
     display: flex;
     flex-direction: column;
-    margin-top: 1%;
-    padding: 1%;
+    margin-bottom: 1%;
+    padding:  1% 2%;
+    border-radius: 32px;
+    /* border: 1px solid; */
 }
 .sent{
     margin-right: 1%;
     align-items: flex-end;
-    background-color: red;
+    background-color: #050934;
+    color: white;
     margin-left: auto;
 }
 .replies{
     margin-left: 1%;
     align-items: flex-start;
+    background-color: #C21807;
+    color: white;
 }
-li p{
+div p{
     /* max-width: 80%; */
+    /* border: 1px solid; */
 }
 .sent p{
     text-align: right;
 }
 .replies p {
     text-align: left;
+}
+
+#head{
+    height: 5%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    box-shadow: 0 0 20px #00000020;
+    padding: 0 1%;
+}
+
+#left_article ul{
+    width: 100%;
+    height: 100%;
+}
+#left_article li{
+    width: 100%;
+    text-align: center;
+    border: 1px solid;
+    /* padding: 3% 0; */
+    font-size: large;
+}
+#left_article a{
+    /* width: 98%; */
+    /* padding:1%; */
+    border: 1px solid;
 }

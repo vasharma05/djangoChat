@@ -4,7 +4,8 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from . import models
 class ChatConsumer(WebsocketConsumer):
-
+    # def __init__(self):
+    #     self.Room = None
     def fetch_messages(self, data):
         messages = models.Message.last_10_messages(data['room'])
         content = {
@@ -55,6 +56,8 @@ class ChatConsumer(WebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+
+
 
         self.accept()
 

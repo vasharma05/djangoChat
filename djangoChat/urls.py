@@ -19,6 +19,6 @@ from django.contrib.auth.views import LoginView, LogoutView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('chat/', include('chat.urls')),
+    path('', include('chat.urls')),
     path("accounts/", include("accounts.urls"))
 ]

@@ -5,7 +5,7 @@ class Room(models.Model):
     name = models.CharField(max_length=256, default='check', unique=False)
     group = models.BooleanField()
     users = models.ManyToManyField(User)
-
+    
     def __str__(self):
         return str(self.id)
     

@@ -5,21 +5,28 @@
     <title>Chat Rooms</title>
 </head>
 <body>
-    What chat room would you like to enter?<br>
-    <input id="room-name-input" type="text" size="100"><br>
-    <input id="room-name-submit" type="button" value="Enter">
+    What chat Group would you like to enter?<br>
+    <input id="group-name-input" type="text" size="100"><br>
+    <input id="group-name-submit" type="button" value="Enter">
+    <ul>
+        {% for u in users %}
+            {% if u.username != user.username %}
+            <a href={% url 'chats:room' room_name=u.username %}><li>@{{ u.username }}</li></a>
+            {% endif %}
+        {% endfor %}
+    </ul>
 
     <script>
-        document.querySelector('#room-name-input').focus();
-        document.querySelector('#room-name-input').onkeyup = function(e) {
+        document.querySelector('#group-name-input').focus();
+        document.querySelector('#group-name-input').onkeyup = function(e) {
             if (e.keyCode === 13) {  // enter, return
-                document.querySelector('#room-name-submit').click();
+                document.querySelector('#group-name-submit').click();
             }
         };
 
-        document.querySelector('#room-name-submit').onclick = function(e) {
-            var roomName = document.querySelector('#room-name-input').value;
-            window.location.pathname = '/' + roomName + '/';
+        document.querySelector('#group-name-submit').onclick = function(e) {
+            var groupName = document.querySelector('#group-name-input').value;
+            window.location.pathname = '/group/' + groupName + '/';
         };
     </script>
 </body>

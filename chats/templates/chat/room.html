@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Room</title>
+</head>
+    <link rel="stylesheet" href={% static 'chat/css/index.css' %}>
+<body>
+    {{ room_name|json_script:"room-name" }}
+    <div id="App">
+        <div id="left_article">
+            <ul>
+                {% for u in users %}
+                    {% if u.username != user.username %}
+                    <a href={% url 'chats:room' room_name=u.username %}><li>@{{ u.username }}</li></a>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        <div id="right_article">
+            <div id='head'>
+                @{{room_name}}
+            </div>
+            <div id='box'>
+                
+            </div>
+            <div id='input'>
+                <input id="chat-message-input" type="text">
+                <input id="chat-message-submit" type="button" value="Send">
+            </div>
+        </div>
+    </div>
+    
+
+
+
+    
+
+    <script src={% static 'chat/js/reconnecting-websocket.min.js' %}></script>
+    <script>
+        const username = '{{user.username}}'
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+        const chatSocket = new ReconnectingWebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/'
+            + roomName
+            + '/'
+        );
+        chatSocket.onopen = (e)=>{
+            console.log('Websocket Open')
+            chatSocket.send(JSON.stringify({'command':'fetch_messages'}))
+        }
+        chatSocket.onerror = (e)=>{
+            console.log(e.message)
+        }
+        function createMessage(message){
+            // console.log(message)
+            let div = document.createElement('div')
+            let small = document.createElement('small')
+            small.textContent = message.author
+            if(message.author == username){
+                div.className = 'sent'
+                small.textContent = "You"
+            }else{
+                div.className = 'replies'
+                small.textContent = message.author
+            }
+            let p = document.createElement('p')
+            p.textContent = message.content
+            div.appendChild(small)
+            div.appendChild(p)
+            document.getElementById('box').appendChild(div)
+        }
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log(data)
+            if(data['command']=== 'messages'){
+                for(let i =0; i<data['messages'].length;i++){
+                    createMessage(data['messages'][i])
+                }
+            }else if(data['command'] === 'new_message'){
+                createMessage(data['message'])
+            }
+            // document.querySelector('#chat-log').value += (data.message + '\n');
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            if(message!==''){
+                chatSocket.send(JSON.stringify({
+                    'command': 'new_message',
+                    'message': {
+                        'author': username,
+                        'content': message,
+                    }
+                }));
+            }
+            messageInputDom.value = '';
+        };
+    </script>
+</body>
+</html>
